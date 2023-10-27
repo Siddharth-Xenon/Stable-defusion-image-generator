@@ -4,8 +4,11 @@ import uuid
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from google.cloud import storage
+from tools import stable
 
 from config import BASE_PATH, SECRET_KEY, MONGO_URL, DB_NAME, USERNAME, PASSWORD
+
+stable_diffusion = stable.Stable()
 
 app = Flask(__name__)
 # Initialize MongoDB client
