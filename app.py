@@ -31,10 +31,13 @@ TEMP_STORAGE_FOLDER = "out/"
 if not os.path.exists(TEMP_STORAGE_FOLDER):
     os.makedirs(TEMP_STORAGE_FOLDER)
 
+CHARACTERNAME = ""
+FILENAME = ""
+
 
 # Helper function to move files to Google Cloud Storage
 def move_to_cloud_storage(filename, character_name):
-    character_name = ''.join(character_name.split())
+    character_name = "".join(character_name.split())
     blob = bucket.blob(f"{character_name}/{filename}")
     blob.upload_from_filename(f"out/{filename}")
 
@@ -59,6 +62,7 @@ def home():
 
 @app.route("/generate-image", methods=["POST"])
 def generate_image():
+    global CHARACTERNAME, FILENAME
     data = request.form
     character_name = data["characterName"]
     prompt = data["description"]
@@ -74,7 +78,7 @@ def generate_image():
         outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
     else:
         _, seed = stable_diffusion.generate_image(prompt)
-        filename = f'txt2img_{seed}.png'
+        filename = f"txt2img_{seed}.png"
 
     # Store information about the image in MongoDB
     image_data = {
@@ -84,7 +88,10 @@ def generate_image():
     }
     collection.insert_one(image_data)
 
-    image_url = move_to_cloud_storage(filename, character_name)
+    CHARACTERNAME = character_name
+    FILENAME = filename
+
+    # image_url = move_to_cloud_storage(filename, character_name)
     # # # Return the generated image's URL and image ID
     # return jsonify({"image_url": image_url, "image_id": image_id})
 
@@ -133,6 +140,20 @@ def previous_images(character_name):
         for image in collection.find({"character_name": character_name})
     ]
     return jsonify({"image_urls": image_urls})
+
+
+def process():
+    action = request.form.get("action")
+
+    if action == "keep":
+        pass
+    elif action == "discard":
+        # Handle the "Discard" action
+        # Add your logic here
+        pass
+
+    # Redirect back to the main page or any other desired page
+    return redirect("/")
 
 
 if __name__ == "__main__":
