@@ -13,6 +13,12 @@ from config import (
     USERNAME,
     PASSWORD
 )
+from tools import stable
+
+stable_diffusion = stable.Stable()
+
+
+
 app = Flask(__name__)
 # Initialize MongoDB client
 mongo_client = MongoClient(f"mongodb+srv://{USERNAME}:{PASSWORD}@stable.myeot1r.mongodb.net/")
@@ -81,6 +87,7 @@ def generate_image():
         outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
     else:
         # Generate image without an outline
+        stable_diffusion.generate_image(prompt)
         pass  # Replace with your model call
 
     # Store information about the image in MongoDB
@@ -92,8 +99,9 @@ def generate_image():
     collection.insert_one(image_data)
 
     # image_url = move_to_cloud_storage(image_id + "_" + filename, character_name)
-    # # Return the generated image's URL and image ID
+    # # # Return the generated image's URL and image ID
     # return jsonify({"image_url": image_url, "image_id": image_id})
+    
     return render_template("index.html")
 
 
