@@ -5,20 +5,27 @@ from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from google.cloud import storage
 
-app = Flask(__name)
-
+from config import (
+    BASE_PATH,
+    SECRET_KEY,
+    MONGO_URL,
+    DB_NAME,
+    USERNAME,
+    PASSWORD
+)
+app = Flask(__name__)
 # Initialize MongoDB client
-mongo_client = MongoClient("mongodb://localhost:27017")
+mongo_client = MongoClient(f"mongodb+srv://{USERNAME}:{PASSWORD}@stable.myeot1r.mongodb.net/")
 db = mongo_client["image_data"]
 collection = db["images"]
-
 # Initialize Google Cloud Storage client
 os.environ[
     "GOOGLE_APPLICATION_CREDENTIALS"
-] = "C:/Users/adeeb/Desktop/Projects/RimorAI/Stable-defusion-image-generator/key/clever-obelisk-402805-a6790dbab289.json"
+] = f"{BASE_PATH}/key/clever-obelisk-402805-a6790dbab289.json"
 storage_client = storage.Client()
 bucket_name = "rimorai_bucket1"
 bucket = storage_client.get_bucket(bucket_name)
+
 
 # Temporary storage for uploaded images
 TEMP_STORAGE_FOLDER = "temp_storage/"
@@ -64,6 +71,7 @@ def generate_image():
         pass  # Replace with your model call
     else:
         # Generate image without an outline
+
         pass  # Replace with your model call
 
     # Save the generated image to temporary storage
