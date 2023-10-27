@@ -8,7 +8,7 @@ class Stable:
         self.headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": "Bearer sk-5jysaVrjP2UyopsZOXpbxurpb7F0QQQn1tGHjqOkptaGVLY1",
+            "Authorization": "Bearer sk-lP8Czt6S8TOvEPbdkesem8uaw0gbvoX2eMbOrxkx512iIRHn",
         }
         
 
@@ -41,12 +41,12 @@ class Stable:
         data = response.json()
 
         # make sure the out directory exists
-        if not os.path.exists("./out"):
-            os.makedirs("./out")
+        if not os.path.exists(".static/images"):
+            os.makedirs("./static/images")
 
         for i, image in enumerate(data["artifacts"]):
-            with open(f'./out/txt2img_{image["seed"]}.png', "wb") as f:
+            with open(f'./static/images/txt2img_{image["seed"]}.png', "wb") as f:
                 f.write(base64.b64decode(image["base64"]))
             
-            return f'./out/txt2img_{image["seed"]}.png', image["seed"]
+            return f'./static/images/txt2img_{image["seed"]}.png', image["seed"]
 

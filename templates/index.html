@@ -36,7 +36,16 @@
     <div class="right-sidebar">
         <h2>Previous Generations</h2>
         <div class="thumbnails">
-            <!-- Thumbnails will be dynamically generated -->
+            {% if filename %}
+                <div class="generated-image">
+                  <h2>Generated Image</h2>
+                    <img src="{{ url_for('static', filename='images/' + filename) }}" alt="Generated Image">
+                </div>
+            {% else %}
+                <div class="generated-image">
+                    <h2>No Image Available</h2>
+                </div>
+            {% endif %}
         </div>
         <form method="post" action="/process">
             <button name="action" value="keep" class="keep-button">Keep</button>

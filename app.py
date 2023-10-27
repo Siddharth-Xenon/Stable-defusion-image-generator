@@ -77,7 +77,7 @@ def generate_image():
         filename = secure_filename(outline_image.filename)
         outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
     else:
-        _, seed = stable_diffusion.generate_image(prompt)
+        location, seed = stable_diffusion.generate_image(prompt)
         filename = f"txt2img_{seed}.png"
 
     # Store information about the image in MongoDB
@@ -95,7 +95,7 @@ def generate_image():
     # # # Return the generated image's URL and image ID
     # return jsonify({"image_url": image_url, "image_id": image_id})
 
-    return render_template("index.html")
+    return render_template("index.html",character_name=CHARACTERNAME, filename = FILENAME)
 
 
 @app.route("/save-image", methods=["POST"])
@@ -153,7 +153,7 @@ def process():
         pass
 
     # Redirect back to the main page or any other desired page
-    return redirect("/")
+    # return redirect("/")
 
 
 if __name__ == "__main__":
