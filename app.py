@@ -40,7 +40,7 @@ PATH_FILE = None
 def move_to_cloud_storage(filename, character_name):
     character_name = "".join(character_name.split())
     blob = bucket.blob(f"{character_name}/{filename}")
-    blob.upload_from_filename(f"out/{filename}")
+    blob.upload_from_filename(f"{PATH_FILE}")
 
     return blob.public_url
 
@@ -96,7 +96,9 @@ def generate_image():
     # # # Return the generated image's URL and image ID
     # return jsonify({"image_url": image_url, "image_id": image_id})
 
-    return render_template("index.html")
+    return render_template(
+        "index.html", character_name=CHARACTERNAME, filename=FILENAME
+    )
 
 
 @app.route("/save-image", methods=["POST"])
@@ -154,10 +156,10 @@ def process():
 
     if action == "keep":
         image_url = move_to_cloud_storage(FILENAME, CHARACTERNAME)
-    elif action == "discard":
-        file_to_delete = PATH_FILE
-        if os.path.exists(file_to_delete):
-            os.remove(file_to_delete)
+
+    file_to_delete = PATH_FILE
+    if os.path.exists(file_to_delete):
+        os.remove(file_to_delete)
 
     # Redirect back to the main page or any other desired page
     FILENAME = None
