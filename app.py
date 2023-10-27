@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -31,8 +31,8 @@ TEMP_STORAGE_FOLDER = "out/"
 if not os.path.exists(TEMP_STORAGE_FOLDER):
     os.makedirs(TEMP_STORAGE_FOLDER)
 
-CHARACTERNAME = ""
-FILENAME = ""
+CHARACTERNAME = None
+FILENAME = None
 
 
 # Helper function to move files to Google Cloud Storage
@@ -142,17 +142,25 @@ def previous_images(character_name):
     return jsonify({"image_urls": image_urls})
 
 
+@app.route("/process", methods=["POST"])
 def process():
+    global FILENAME, CHARACTERNAME
+
+    if FILENAME == None or CHARACTERNAME == None:
+        return redirect("/index")
+
     action = request.form.get("action")
 
     if action == "keep":
-        pass
+        image_url = move_to_cloud_storage(FILENAME, CHARACTERNAME)
     elif action == "discard":
-        # Handle the "Discard" action
-        # Add your logic here
-        pass
+        file_to_delete = os.path.join(TEMP_STORAGE_FOLDER, FILENAME)
+        if os.path.exists(file_to_delete):
+            os.remove(file_to_delete)
 
     # Redirect back to the main page or any other desired page
+    FILENAME = None
+    CHARACTERNAME = None
     return redirect("/")
 
 
