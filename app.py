@@ -63,11 +63,18 @@ def home():
 def generate_image():
     data = request.form
     character_name = data["characterName"]
-    prompt = data["prompt"]
+    prompt = data["description"]
     outline_image = request.files.get("outlineImage")
+    print(f"========================================================================\nGENERATED IMAGE\n{character_name} {prompt}\n ================================================================")
 
     # Process the image using the appropriate model based on the presence of an outline image
     # Replace this with your model logic
+    if outline_image:
+        # Generate image with outline
+        pass  # Replace with your model call
+    else:
+        # Generate image without an outline
+        pass  # Replace with your model call
 
     # Save the generated image to temporary storage
     image_id = str(uuid.uuid4())
@@ -86,19 +93,22 @@ def generate_image():
     }
     collection.insert_one(image_data)
 
-    # Return the generated image's URL and image ID
-    image_url = move_to_cloud_storage(image_id + "_" + filename, character_name)
-    return jsonify({"image_url": image_url, "image_id": image_id})
+    # image_url = move_to_cloud_storage(image_id + "_" + filename, character_name)
+    # # Return the generated image's URL and image ID
+    # return jsonify({"image_url": image_url, "image_id": image_id})
+    return render_template("index.html")
 
 
 @app.route("/save-image", methods=["POST"])
 def save_image():
-    data = request.form
-    image_id = data["imageID"]
+    image_id = request.form["imageID"]
 
+    # Check if the image with the provided image ID exists in temporary storage
     if image_id in saved_images:
         character_name = saved_images[image_id]["character_name"]
+        # Move the image to Google Cloud Storage and update its status in the database
         image_url = move_to_cloud_storage(image_id, character_name)
+        # You can update the image status in the database here
         return jsonify({"message": "Image saved successfully", "image_url": image_url})
     else:
         return jsonify({"error": "Image not found"}, 404)
@@ -106,10 +116,16 @@ def save_image():
 
 @app.route("/discard-image", methods=["DELETE"])
 def discard_image():
+    print("========================================================================\n\t\DISCARDED IMAGE\n ================================================================")
+
     image_id = request.form["imageID"]
+
+    # Check if the image with the provided image ID exists in temporary storage
     if image_id in saved_images:
+        # Delete the image from temporary storage
+        delete_from_temp_storage(image_id)
+        # You can also update the database to reflect that the image has been discarded
         del saved_images[image_id]
-        delete_from_temp_storage(image_id)  # Delete from temporary storage
         return jsonify({"message": "Image discarded successfully"})
     else:
         return jsonify({"error": "Image not found"}, 404)
@@ -117,11 +133,16 @@ def discard_image():
 
 @app.route("/previous-images/<character_name>", methods=["GET"])
 def previous_images(character_name):
+    # Query the database to find images associated with the provided character name
     image_urls = [
         move_to_cloud_storage(image["image_id"], character_name)
         for image in collection.find({"character_name": character_name})
     ]
     return jsonify({"image_urls": image_urls})
+
+
+
+
 
 
 if __name__ == "__main__":

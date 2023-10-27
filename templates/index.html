@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <h1>Create a Character</h1>
-        <form id="characterForm">
+        <form id="characterForm"  action="{{ url_for('generate_image') }}" method="post">
             <div class="form-group">
                 <label for="characterName">Character Name</label>
                 <input type="text" id="characterName" name="characterName" placeholder="Enter the name of the character or prop" required>
