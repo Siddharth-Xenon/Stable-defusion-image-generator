@@ -4,24 +4,17 @@ import uuid
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from google.cloud import storage
-
-from config import (
-    BASE_PATH,
-    SECRET_KEY,
-    MONGO_URL,
-    DB_NAME,
-    USERNAME,
-    PASSWORD
-)
 from tools import stable
+
+from config import BASE_PATH, SECRET_KEY, MONGO_URL, DB_NAME, USERNAME, PASSWORD
 
 stable_diffusion = stable.Stable()
 
-
-
 app = Flask(__name__)
 # Initialize MongoDB client
-mongo_client = MongoClient(f"mongodb+srv://{USERNAME}:{PASSWORD}@stable.myeot1r.mongodb.net/")
+mongo_client = MongoClient(
+    f"mongodb+srv://{USERNAME}:{PASSWORD}@stable.myeot1r.mongodb.net/"
+)
 db = mongo_client["image_data"]
 collection = db["images"]
 # Initialize Google Cloud Storage client
@@ -70,7 +63,9 @@ def generate_image():
     character_name = data["characterName"]
     prompt = data["description"]
     outline_image = request.files.get("outlineImage")
-    print(f"========================================================================\nGENERATED IMAGE\n{character_name} {prompt}\n ================================================================")
+    print(
+        f"========================================================================\nGENERATED IMAGE\n{character_name} {prompt}\n ================================================================"
+    )
 
     # Save the generated image to temporary storage
     image_id = str(uuid.uuid4())
@@ -92,7 +87,7 @@ def generate_image():
     image_url = move_to_cloud_storage(filename, character_name)
     # # # Return the generated image's URL and image ID
     # return jsonify({"image_url": image_url, "image_id": image_id})
-    
+
     return render_template("index.html")
 
 
@@ -113,7 +108,9 @@ def save_image():
 
 @app.route("/discard-image", methods=["DELETE"])
 def discard_image():
-    print("========================================================================\n\t\DISCARDED IMAGE\n ================================================================")
+    print(
+        "========================================================================\n\t\DISCARDED IMAGE\n ================================================================"
+    )
 
     image_id = request.form["imageID"]
 
