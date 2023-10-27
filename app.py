@@ -34,15 +34,17 @@ bucket = storage_client.get_bucket(bucket_name)
 
 
 # Temporary storage for uploaded images
-TEMP_STORAGE_FOLDER = "temp_storage/"
+TEMP_STORAGE_FOLDER = "out/"
 if not os.path.exists(TEMP_STORAGE_FOLDER):
     os.makedirs(TEMP_STORAGE_FOLDER)
 
 
 # Helper function to move files to Google Cloud Storage
 def move_to_cloud_storage(filename, character_name):
+    character_name = ''.join(character_name.split())
     blob = bucket.blob(f"{character_name}/{filename}")
-    blob.upload_from_filename(os.path.join(TEMP_STORAGE_FOLDER, filename))
+    blob.upload_from_filename(f"out/{filename}")
+
     return blob.public_url
 
 
@@ -70,25 +72,14 @@ def generate_image():
     outline_image = request.files.get("outlineImage")
     print(f"========================================================================\nGENERATED IMAGE\n{character_name} {prompt}\n ================================================================")
 
-    # Process the image using the appropriate model based on the presence of an outline image
-    # Replace this with your model logic
-    if outline_image:
-        # Generate image with outline
-        pass  # Replace with your model call
-    else:
-        # Generate image without an outline
-
-        pass  # Replace with your model call
-
     # Save the generated image to temporary storage
     image_id = str(uuid.uuid4())
     if outline_image:
         filename = secure_filename(outline_image.filename)
         outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
     else:
-        # Generate image without an outline
-        stable_diffusion.generate_image(prompt)
-        pass  # Replace with your model call
+        _, seed = stable_diffusion.generate_image(prompt)
+        filename = f'txt2img_{seed}.png'
 
     # Store information about the image in MongoDB
     image_data = {
@@ -98,7 +89,7 @@ def generate_image():
     }
     collection.insert_one(image_data)
 
-    # image_url = move_to_cloud_storage(image_id + "_" + filename, character_name)
+    image_url = move_to_cloud_storage(filename, character_name)
     # # # Return the generated image's URL and image ID
     # return jsonify({"image_url": image_url, "image_id": image_id})
     
@@ -145,10 +136,6 @@ def previous_images(character_name):
         for image in collection.find({"character_name": character_name})
     ]
     return jsonify({"image_urls": image_urls})
-
-
-
-
 
 
 if __name__ == "__main__":
