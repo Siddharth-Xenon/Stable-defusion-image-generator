@@ -77,7 +77,7 @@ def generate_image():
         filename = secure_filename(outline_image.filename)
         outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
     else:
-        _, seed = stable_diffusion.generate_image(prompt)
+        location, seed = stable_diffusion.generate_image(prompt)
         filename = f"txt2img_{seed}.png"
 
     # Store information about the image in MongoDB
