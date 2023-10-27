@@ -33,6 +33,7 @@ if not os.path.exists(TEMP_STORAGE_FOLDER):
 
 CHARACTERNAME = None
 FILENAME = None
+PATH_FILE = None
 
 
 # Helper function to move files to Google Cloud Storage
@@ -62,7 +63,7 @@ def home():
 
 @app.route("/generate-image", methods=["POST"])
 def generate_image():
-    global CHARACTERNAME, FILENAME
+    global CHARACTERNAME, FILENAME, PATH_FILE
     data = request.form
     character_name = data["characterName"]
     prompt = data["description"]
@@ -77,7 +78,7 @@ def generate_image():
         filename = secure_filename(outline_image.filename)
         outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
     else:
-        location, seed = stable_diffusion.generate_image(prompt)
+        PATH_FILE, seed = stable_diffusion.generate_image(prompt)
         filename = f"txt2img_{seed}.png"
 
     # Store information about the image in MongoDB
@@ -154,7 +155,7 @@ def process():
     if action == "keep":
         image_url = move_to_cloud_storage(FILENAME, CHARACTERNAME)
     elif action == "discard":
-        file_to_delete = os.path.join(TEMP_STORAGE_FOLDER, FILENAME)
+        file_to_delete = PATH_FILE
         if os.path.exists(file_to_delete):
             os.remove(file_to_delete)
 
