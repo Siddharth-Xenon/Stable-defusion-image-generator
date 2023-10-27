@@ -5,17 +5,13 @@ from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from google.cloud import storage
 
-from config import (
-    BASE_PATH,
-    SECRET_KEY,
-    MONGO_URL,
-    DB_NAME,
-    USERNAME,
-    PASSWORD
-)
+from config import BASE_PATH, SECRET_KEY, MONGO_URL, DB_NAME, USERNAME, PASSWORD
+
 app = Flask(__name__)
 # Initialize MongoDB client
-mongo_client = MongoClient(f"mongodb+srv://{USERNAME}:{PASSWORD}@stable.myeot1r.mongodb.net/")
+mongo_client = MongoClient(
+    f"mongodb+srv://{USERNAME}:{PASSWORD}@stable.myeot1r.mongodb.net/"
+)
 db = mongo_client["image_data"]
 collection = db["images"]
 # Initialize Google Cloud Storage client
@@ -62,7 +58,9 @@ def generate_image():
     character_name = data["characterName"]
     prompt = data["description"]
     outline_image = request.files.get("outlineImage")
-    print(f"========================================================================\nGENERATED IMAGE\n{character_name} {prompt}\n ================================================================")
+    print(
+        f"========================================================================\nGENERATED IMAGE\n{character_name} {prompt}\n ================================================================"
+    )
 
     # Process the image using the appropriate model based on the presence of an outline image
     # Replace this with your model logic
@@ -114,7 +112,9 @@ def save_image():
 
 @app.route("/discard-image", methods=["DELETE"])
 def discard_image():
-    print("========================================================================\n\t\DISCARDED IMAGE\n ================================================================")
+    print(
+        "========================================================================\n\t\DISCARDED IMAGE\n ================================================================"
+    )
 
     image_id = request.form["imageID"]
 
@@ -137,10 +137,6 @@ def previous_images(character_name):
         for image in collection.find({"character_name": character_name})
     ]
     return jsonify({"image_urls": image_urls})
-
-
-
-
 
 
 if __name__ == "__main__":
