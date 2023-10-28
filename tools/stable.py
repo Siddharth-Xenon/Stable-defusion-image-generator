@@ -7,8 +7,8 @@ class Stable:
     def __init__(self):
         # self.url = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image" #stable 1
         # self.url = "https://api.stability.ai/v1/generation/stable-diffusion-v1-5/text-to-image" # stable 1.5
-        self.url = "https://api.stability.ai/v1/generation/stable-diffusion-512-v2-1/text-to-image" # stable 2
-        
+        self.url = "https://api.stability.ai/v1/generation/stable-diffusion-512-v2-1/text-to-image"  # stable 2
+
         self.headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
