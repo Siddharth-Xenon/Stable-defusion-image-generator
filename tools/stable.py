@@ -5,21 +5,24 @@ import os
 
 class Stable:
     def __init__(self):
-        self.url = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
+        # self.url = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image" #stable 1
+        # self.url = "https://api.stability.ai/v1/generation/stable-diffusion-v1-5/text-to-image" # stable 1.5
+        self.url = "https://api.stability.ai/v1/generation/stable-diffusion-512-v2-1/text-to-image" # stable 2
+        
         self.headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": "Bearer sk-lP8Czt6S8TOvEPbdkesem8uaw0gbvoX2eMbOrxkx512iIRHn",
+            "Authorization": "Bearer sk-f0nm5eii4k4yJlSEx7O6ufUidnLq3AzhNAOFC6qpvMnF4cxA",
         }
 
     def generate_image(self, prompt):
         self.prompt = prompt
         body = {
-            "steps": 20,
-            "width": 896,
-            "height": 1152,
+            "steps": 10,
+            "width": 512,
+            "height": 512,
             "seed": 0,
-            "cfg_scale": 3,
+            "cfg_scale": 5,
             "samples": 1,
             "text_prompts": [
                 {"text": self.prompt, "weight": 1},
