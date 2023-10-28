@@ -84,23 +84,20 @@ def generate_image():
     image_id = str(uuid.uuid4())
 
     if outline_image:
-<<<<<<< HEAD
-        controlnet.process_request(prompt_text, image_url)
-        # filename = secure_filename(outline_image.filename)
-        # outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
-=======
         outline_image_id = str(uuid.uuid4())
         outline_filename = secure_filename(outline_image.filename)
+
         PATH_FILE = os.path.join(
             TEMP_STORAGE_FOLDER, outline_image_id + "_" + outline_filename
         )
+
         outline_image.save(PATH_FILE)
         image_url = move_to_cloud_storage(
             outline_image_id + "_" + outline_filename, "#OutlineImages"
         )
         PATH_FILE = None
-        print(image_url)
->>>>>>> 53ccad24594ecf8e6dc46fab7a9895150f0669dd
+        PATH_FILE, seed = controlnet.process_request(prompt, image_url)
+
     else:
         PATH_FILE, seed = stable_diffusion.generate_image(prompt)
         filename = f"txt2img_{seed}.png"

@@ -17,9 +17,9 @@ class ControlNet:
             "model_id": "midjourney",
             "auto_hint": "yes",
             "guess_mode": "no",
-            "prompt": self.prompt,
+            "prompt": prompt,
             "negative_prompt": None,
-            "init_image": self.image_path,
+            "init_image": image_path,
             "mask_image": None,
             "width": "512",
             "height": "512",
@@ -45,41 +45,52 @@ class ControlNet:
             'Content-Type': 'application/json'
         }
 
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
-
-        return response
+        try:
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            response.raise_for_status()  # Raise HTTPError for bad response (4xx and 5xx)
+            return response
+        except requests.exceptions.RequestException as e:
+            print(f"Error making API request: {e}")
+            return None
 
     @staticmethod
     def save_image(image_bytes, seed):
         if not os.path.exists("./static/images"):
             os.makedirs("./static/images")
 
-        with open(f'./static/images/img2img_{seed}.png', "wb") as f:
-            f.write(image_bytes.getvalue())
-
-        return f'./static/images/img2img_{seed}.png', seed
+        try:
+            with open(f'./static/images/img2img_{seed}.png', "wb") as f:
+                f.write(image_bytes.getvalue())
+            return f'./static/images/img2img_{seed}.png', seed
+        except Exception as e:
+            print(f"Error saving image: {e}")
+            return None, None
 
     def extract_image_from_response(self, response):
-        if response["status"] == "success" and "output" in response and len(response["output"]) > 0:
-            image_url = response["output"][0]
-            image_response = requests.get(image_url)
-            if image_response.status_code == 200:
-                image_bytes = BytesIO(image_response.content)
-                image = Image.open(image_bytes)
+        try:
+            if response and response["status"] == "success" and "output" in response and len(response["output"]) > 0:
+                image_url = response["output"][0]
+                image_response = requests.get(image_url)
+                image_response.raise_for_status()  # Raise HTTPError for bad response (4xx and 5xx)
+                if image_response.status_code == 200:
+                    image_bytes = BytesIO(image_response.content)
+                    image = Image.open(image_bytes)
 
-                seed = response["meta"]["seed"]
-                saved_image_path, seed = self.save_image(image_bytes, seed)
+                    seed = response["meta"]["seed"]
+                    saved_image_path, seed = self.save_image(image_bytes, seed)
 
-                return saved_image_path, seed
+                    return saved_image_path, seed
+                else:
+                    print(f"Failed to retrieve image. Status code: {image_response.status_code}")
             else:
-                print(f"Failed to retrieve image. Status code: {image_response.status_code}")
-        else:
-            print("Invalid API response or no image found.")
+                print("Invalid API response or no image found.")
+        except Exception as e:
+            print(f"Error extracting image from response: {e}")
 
     def process_request(self, prompt, image_path):
         response = self.make_api_request(prompt, image_path)
 
-        if response.status_code == 200:
+        if response is not None and response.status_code == 200:
             api_response = response.json()
             saved_image_path, seed = self.extract_image_from_response(api_response)
 
@@ -88,12 +99,13 @@ class ControlNet:
                 print(f"Seed: {seed}")
             else:
                 print("Failed to save image.")
-        else:
+        elif response is not None:
             print(f"Failed to make API request. Status code: {response.status_code}")
+        else:
+            print("No response received.")
 
 
 # Example usage
-
 api_key = "o4GCZ0DZox648YizgwbnvmiFTvpb4D7bbbTqx7gd0vLre7WJmMad4jBFmjLN"
 prompt_text = "mountains and river, ultra high resolution, 4K image"
 image_url = "https://storage.googleapis.com/rimorai_bucket1/horse/txt2img_86571881.png"
