@@ -46,9 +46,9 @@ PATH_FILE = None
 
 
 # Helper function to move files to Google Cloud Storage
-def move_to_cloud_storage(filename, character_name):
-    character_name = "".join(character_name.split())
-    blob = bucket.blob(f"{character_name}/{filename}")
+def move_to_cloud_storage(filename, folder_name):
+    folder_name = "".join(folder_name.split())
+    blob = bucket.blob(f"{folder_name}/{filename}")
     blob.upload_from_filename(f"{PATH_FILE}")
 
     return blob.public_url
@@ -76,17 +76,31 @@ def generate_image():
     data = request.form
     character_name = data["characterName"]
     prompt = data["description"]
-    outline_image = request.files.get("outlineImage")
+    outline_image = request.files.get("imageUpload")
     print(
         f"========================================================================\nGENERATED IMAGE\n{character_name} {prompt}\n ================================================================"
     )
-
     # Save the generated image to temporary storage
     image_id = str(uuid.uuid4())
+
     if outline_image:
+<<<<<<< HEAD
         controlnet.process_request(prompt_text, image_url)
         # filename = secure_filename(outline_image.filename)
         # outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
+=======
+        outline_image_id = str(uuid.uuid4())
+        outline_filename = secure_filename(outline_image.filename)
+        PATH_FILE = os.path.join(
+            TEMP_STORAGE_FOLDER, outline_image_id + "_" + outline_filename
+        )
+        outline_image.save(PATH_FILE)
+        image_url = move_to_cloud_storage(
+            outline_image_id + "_" + outline_filename, "#OutlineImages"
+        )
+        PATH_FILE = None
+        print(image_url)
+>>>>>>> 53ccad24594ecf8e6dc46fab7a9895150f0669dd
     else:
         PATH_FILE, seed = stable_diffusion.generate_image(prompt)
         filename = f"txt2img_{seed}.png"
