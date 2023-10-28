@@ -39,7 +39,7 @@
             {% if filename %}
                 <div class="generated-image">
                   <h2>Generated Image</h2>
-                    <img src="{{ url_for('static', filename='images/' + filename) }}" alt="Generated Image">
+                  <img src="{{ url_for('static', filename='images/' + filename) }}" alt="Generated Image" class = "responsive-image"> 
                 </div>
             {% else %}
                 <div class="generated-image">
