@@ -4,11 +4,20 @@ import uuid
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from google.cloud import storage
-from tools import stable
+from tools import stable, controlNet
 
-from config import BASE_PATH, SECRET_KEY, MONGO_URL, DB_NAME, USERNAME, PASSWORD
+from config import (
+    BASE_PATH,
+    SECRET_KEY, 
+    MONGO_URL, 
+    DB_NAME, 
+    USERNAME, 
+    PASSWORD,
+    controlnet_api
+    )
 
 stable_diffusion = stable.Stable()
+controlnet = controlNet.ControlNet(controlnet_api)
 
 app = Flask(__name__)
 # Initialize MongoDB client
@@ -75,8 +84,9 @@ def generate_image():
     # Save the generated image to temporary storage
     image_id = str(uuid.uuid4())
     if outline_image:
-        filename = secure_filename(outline_image.filename)
-        outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
+        controlnet.process_request(prompt_text, image_url)
+        # filename = secure_filename(outline_image.filename)
+        # outline_image.save(os.path.join(TEMP_STORAGE_FOLDER, image_id + "_" + filename))
     else:
         PATH_FILE, seed = stable_diffusion.generate_image(prompt)
         filename = f"txt2img_{seed}.png"

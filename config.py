@@ -10,6 +10,7 @@ with open(f'{BASE_PATH}/key/config.json') as f:
     config = json.load(f)
 USERNAME = config["USERNAME"]
 PASSWORD = config["PASSWORD"]
+controlnet_api = config["CONTROLNET_API"]
 
 MONGO_DB = {
     "host": "",
