@@ -106,9 +106,9 @@ class ControlNet:
 
 
 # Example usage
-api_key = "o4GCZ0DZox648YizgwbnvmiFTvpb4D7bbbTqx7gd0vLre7WJmMad4jBFmjLN"
-prompt_text = "mountains and river, ultra high resolution, 4K image"
-image_url = "https://storage.googleapis.com/rimorai_bucket1/horse/txt2img_86571881.png"
+# api_key = "o4GCZ0DZox648YizgwbnvmiFTvpb4D7bbbTqx7gd0vLre7WJmMad4jBFmjLN"
+# prompt_text = "mountains and river, ultra high resolution, 4K image"
+# image_url = "https://storage.googleapis.com/rimorai_bucket1/horse/txt2img_86571881.png"
 
-extractor = ControlNet(api_key)
-extractor.process_request(prompt_text, image_url)
+# extractor = ControlNet(api_key)
+# extractor.process_request(prompt_text, image_url)
