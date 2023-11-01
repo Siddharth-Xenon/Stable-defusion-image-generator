@@ -66,10 +66,51 @@ class ControlNet:
         except Exception as e:
             print(f"Error saving image: {e}")
             return None, None
+        
+    def fetch_processed_image(self, fetch_url, retry_interval=5, max_retries=3):
+        retries = 0
+        while retries < max_retries:
+            try:
+                # Attempting with a GET request first
+                response = requests.get(fetch_url)
+                response.raise_for_status()
+                if response.status_code == 200:
+                    return BytesIO(response.content)
+                
+            except requests.exceptions.HTTPError as e:
+                if response.status_code == 405:
+                    # If a 'Method Not Allowed' error occurs, it means we need to try a different method.
+                    print("GET request not allowed, trying with POST...")
+                    try:
+                        # Some APIs require a POST request to retrieve the content
+                        response = requests.post(fetch_url)
+                        response.raise_for_status()
+                        if response.status_code == 200:
+                            return BytesIO(response.content)
+                    except requests.exceptions.RequestException as post_err:
+                        # If a POST request also fails, log the specific error
+                        print(f"Error with POST request: {post_err}")
+                else:
+                    # If there's an HTTP error other than 405, log it directly.
+                    print(f"HTTP error occurred: {e}")
+            
+            except requests.exceptions.RequestException as generic_err:
+                # For any other request-related errors, log them directly.
+                print(f"Error occurred during the request: {generic_err}")
 
+            # If no return has been triggered by successful data retrieval, wait before retrying.
+            print(f"Retrying in {retry_interval} seconds...")
+            time.sleep(retry_interval)
+            retries += 1
+
+        # After all retries, if the function hasn't returned, it means the image couldn't be fetched.
+        print("Max retries exceeded. Failed to fetch the processed image.")
+        return None
+    
     def extract_image_from_response(self, response):
         try:
-            if response and response["status"] == "success" and "output" in response and len(response["output"]) > 0:
+            status = response.get("status")
+            if status == "success":
                 image_url = response["output"][0]
                 image_response = requests.get(image_url)
                 image_response.raise_for_status()  # Raise HTTPError for bad response (4xx and 5xx)
@@ -81,16 +122,33 @@ class ControlNet:
                     saved_image_path, seed = self.save_image(image_bytes, seed)
 
                     return saved_image_path, seed
+                # ... [Handle success response as before]
+            elif status == "processing":
+                eta = response.get('eta', 5)  # Use default ETA if not provided
+                eta = max(5,eta)
+                fetch_url = response.get('fetch_result')
+
+                if fetch_url:
+                    print(f"Image is still processing. Trying to fetch after {eta} seconds as suggested.")
+                    time.sleep(eta)
+
+                    image_bytes = self.fetch_processed_image(fetch_url)
+                    if image_bytes:
+                        image = Image.open(image_bytes)
+                        seed = response["meta"]["seed"]
+                        saved_image_path, seed = self.save_image(image_bytes, seed)
+                        return saved_image_path, seed
                 else:
-                    print(f"Failed to retrieve image. Status code: {image_response.status_code}")
+                    print("Fetch URL not found in the 'processing' response.")
             else:
-                print("Invalid API response or no image found.", response)
+                print(f"Unhandled API response status: {status}", response)
         except Exception as e:
             print(f"Error extracting image from response: {e}")
 
+
     def process_request(self, prompt, image_path):
         response = self.make_api_request(prompt, image_path)
-        time.sleep(4)
+        print(response.text)
         if response is not None and response.status_code == 200:
             api_response = response.json()
             saved_image_path, seed = self.extract_image_from_response(api_response)
@@ -106,10 +164,11 @@ class ControlNet:
             print("No response received.")
         return saved_image_path, seed
 
+
 # Example usage
 # api_key = "dPUaQdPuy24XCdSnWS9Bkqhz1V6GKo8HygYcTMnj8vLF3hKPr5bdOU6O3LD2"
-# prompt_text = "indian cricket player navjyot singh siddhu"
-# image_url = "https://storage.googleapis.com/rimorai_bucket1/%23OutlineImages/c83fbd25-b885-4f01-bc55-561ccb0b4e7c_Capture.JPG"
+# prompt_text = "2 horses"
+# image_url = "https://storage.googleapis.com/rimorai_bucket1/%23OutlineImages/fa8f06ed-ccb2-43cc-b5ec-bf4c84eaad9d_txt2img_3999602510.png"
 
 # extractor = ControlNet(api_key)
 # extractor.process_request(prompt_text, image_url)
