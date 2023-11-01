@@ -3,6 +3,7 @@ import json
 from io import BytesIO
 from PIL import Image
 import os
+import time
 
 class ControlNet:
     def __init__(self, api):
@@ -83,13 +84,13 @@ class ControlNet:
                 else:
                     print(f"Failed to retrieve image. Status code: {image_response.status_code}")
             else:
-                print("Invalid API response or no image found.")
+                print("Invalid API response or no image found.", response)
         except Exception as e:
             print(f"Error extracting image from response: {e}")
 
     def process_request(self, prompt, image_path):
         response = self.make_api_request(prompt, image_path)
-
+        time.sleep(4)
         if response is not None and response.status_code == 200:
             api_response = response.json()
             saved_image_path, seed = self.extract_image_from_response(api_response)
@@ -103,12 +104,12 @@ class ControlNet:
             print(f"Failed to make API request. Status code: {response.status_code}")
         else:
             print("No response received.")
-
+        return saved_image_path, seed
 
 # Example usage
-# api_key = "o4GCZ0DZox648YizgwbnvmiFTvpb4D7bbbTqx7gd0vLre7WJmMad4jBFmjLN"
-# prompt_text = "mountains and river, ultra high resolution, 4K image"
-# image_url = "https://storage.googleapis.com/rimorai_bucket1/horse/txt2img_86571881.png"
+# api_key = "dPUaQdPuy24XCdSnWS9Bkqhz1V6GKo8HygYcTMnj8vLF3hKPr5bdOU6O3LD2"
+# prompt_text = "indian cricket player navjyot singh siddhu"
+# image_url = "https://storage.googleapis.com/rimorai_bucket1/%23OutlineImages/c83fbd25-b885-4f01-bc55-561ccb0b4e7c_Capture.JPG"
 
 # extractor = ControlNet(api_key)
 # extractor.process_request(prompt_text, image_url)
