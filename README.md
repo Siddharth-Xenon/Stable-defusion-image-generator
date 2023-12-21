@@ -44,13 +44,3 @@ Our web application harnesses the power of several cutting-edge technologies:
 - **Background Removal**: An option to remove backgrounds from images, making them perfect for projects or animations.
 - **Regeneration Capability**: Not satisfied with the current output? Regenerate with the same prompt for a different image.
 
-
-## Getting Started
-- Visit our website at [qrksee.com](http://qrksee.com) to begin your journey.
-- For personalized accounts and more information, feel free to contact us.
-
-Embark on your creative journey with Character Generator today and transform your imaginative concepts into stunning visuals!
-
-For any queries or support, don't hesitate to reach out to us.
-
-Happy Creating!
